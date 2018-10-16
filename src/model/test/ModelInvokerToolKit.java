@@ -191,40 +191,61 @@ public class ModelInvokerToolKit {
      * 田育林 20180813
      */
     public static String chineseNumToArab(String in_str){
-        Character[] num_str_start_symbol = {'一', '①', '二', '②', '两', '三', '③', '四', '④', '五', '⑤', '六', '⑥', '七', '⑦', '八', '⑧', '九', '⑨', '十', '⑩', 'O', 'o', 'I', 'i'};
+        String return_str = "";
         int in_l = in_str.length();
-        String out_str = "";
-        if(StringUtils.isBlank(in_str) || in_l == 0){
-            return out_str;
-        }
-        boolean has_num_stat = false;
-        String num_str = "";
-        for(int idx=0; idx<in_l; idx++){
-            if (Arrays.asList(num_str_start_symbol).contains(in_str.charAt(idx))){
-                if(!has_num_stat){
-                    has_num_stat = true;
+        if(StringUtils.isNotBlank(in_str) && in_l > 0){
+            Character[] num_str_start_symbol = {'一', '①', '二', '②', '两', '三', '③', '四', '④', '五', '⑤', '六', '⑥', '七', '⑦', '八', '⑧', '九', '⑨', '十', '⑩'};
+            List<String> out_list = new ArrayList<>();
+            boolean has_num_stat = false;
+            String num_str = "";
+            for(int idx=0; idx<in_l; idx++){
+                if (Arrays.asList(num_str_start_symbol).contains(in_str.charAt(idx))){
+                    if(!has_num_stat){
+                        has_num_stat = true;
+                    }
+                    num_str += in_str.charAt(idx);
+                }else{
+                    if(has_num_stat){
+                        if(numeralsMap.keySet().contains(in_str.charAt(idx))){
+                            num_str += in_str.charAt(idx);
+                            continue;
+                        }else{
+                            String num_result = chineseToDigits(num_str);
+                            num_str = "";
+                            has_num_stat = false;
+                            out_list.add(String.valueOf(num_result));
+                        }
+                    }
+                    out_list.add(String.valueOf(in_str.charAt(idx)));
                 }
-                num_str += in_str.charAt(idx);
-            }else{
-                if(has_num_stat){
-                    if(numeralsMap.keySet().contains(in_str.charAt(idx))){
-                        num_str += in_str.charAt(idx);
-                        continue;
+            }
+            if(num_str.length() > 0){
+                String num_result = chineseToDigits(num_str);
+                out_list.add(String.valueOf(num_result));
+            }
+            List<String> out_tmp_list = new ArrayList<>();
+            Map<String, String> tmp_extend_symbol = new HashMap<>();
+            tmp_extend_symbol.put("O", "0");
+            tmp_extend_symbol.put("o", "0");
+            tmp_extend_symbol.put("I", "1");
+            tmp_extend_symbol.put("i", "1");
+            if(out_list.size() > 0){
+                for(int i=0; i<out_list.size(); i++){
+                    String out_str = out_list.get(i);
+                    if(tmp_extend_symbol.containsKey(out_str)){
+                        out_tmp_list.add(tmp_extend_symbol.get(out_str));
                     }else{
-                        String num_result = chineseToDigits(num_str);
-                        num_str = "";
-                        has_num_stat = false;
-                        out_str += num_result;
+                        out_tmp_list.add(out_str);
                     }
                 }
-                out_str += in_str.charAt(idx);
             }
+            return_str = StringUtils.join(out_tmp_list, "");
         }
-        if(num_str.length() > 0){
-            String num_result = chineseToDigits(num_str);
-            out_str += num_result;
-        }
-        return out_str;
+        return return_str;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(chineseNumToArab("你好五三四"));
     }
 
 
